@@ -1,0 +1,208 @@
+body {
+    
+}
+
+.App {
+  text-align: center;
+}
+
+.float-col-2 {
+    width: 49%;
+    min-height: 1px;
+    float: left;
+}
+.float-col-3 {
+    width: 29%;
+    min-height: 1px;
+    float: left;
+}
+.float-col-4 {
+    width: 24%;
+    min-height: 1px;
+    float: left;
+}
+.float-col-5 {
+    width: 19%;
+    min-height: 1px;
+    float: left;
+}
+.float-col-5-2 {
+    width: 38%;
+    min-height: 1px;
+    float: left;
+}
+
+.chat .centertArea h1.logoHeading,.chat .centertArea p.logoSubheading{
+    margin:0px;
+    text-align: left;
+}
+.chat .centertArea span.logoSubheading{
+    padding-left: 0;
+    font-size: 15px;
+}
+.chat .shoMessagesArea{
+    width: 100%;
+    padding: 0px;
+    box-sizing: border-box;
+}
+.chat .messageSendDiv .message{
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+    height: 50px;
+    box-sizing: border-box;
+    outline: 0px !important;
+    outline-offset: 0px !important;
+    resize: vertical;
+}
+.chat {
+    background: rgb(227,227,227);
+    height: calc(100vh - 53px);
+    text-align: left;
+}
+
+
+
+.shoMessagesArea .chats {
+    list-style: none;
+}
+.shoMessagesArea .chats .chatmsg.servermsg{
+    color: rgb( 0, 104, 204);
+    margin: 5px 0px;
+    padding: 2px;
+}
+
+.shoMessagesArea .chats .chatmsg.servermsg p{
+    margin:0px;
+}
+
+
+
+
+
+.righttArea .currentHeading{
+    margin-top: 3px;
+    margin-bottom: 1px;
+}
+.righttArea .currentFileName {
+    margin: 0px;
+    padding: 3px;
+}
+
+.righttArea .currentFileName .currentFileNameBlue{
+   color: rgb( 0, 104, 204);
+}
+
+.righttArea .openFileArea{
+    margin-top: 6px;
+    width: 100%;
+    height: 35vh;
+    background: #fff;
+    overflow: auto;
+    padding: 6px;
+    box-sizing: border-box;
+}
+/* slightly enhanced, universal clearfix hack */
+.clearfix:after {
+     visibility: hidden;
+     display: block;
+     font-size: 0;
+     content: " ";
+     clear: both;
+     height: 0;
+     }
+.clearfix { display: inline-block; }
+/* start commented backslash hack \*/
+* html .clearfix { height: 1%; }
+.clearfix { display: block; }
+/* close commented backslash hack */
+
+
+/* Remove browser forced style on auto-fill inputs */
+input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+    color: rgb(0, 0, 0);
+    -webkit-box-shadow: 0 0 0 40px white inset;
+    -webkit-text-fill-color: rgba(0, 0, 0, 0.87) !important;
+}
+
+
+/*UI UPdate Mod 1*/
+
+.leftArea {
+    width: 160px;
+    min-height: calc(100vh - 53px);
+    float: left;
+    background: rgb(51,51,51);
+    color: #fff;
+    padding: 19px;
+    box-sizing: border-box;
+    font-weight: 700;
+}
+.centertArea {
+    width: calc(69% - 160px);
+}
+.righttArea {
+    float: right;
+}
+
+.chat .messageSendDiv .submitbutton {
+    background: rgb(131,127,130);
+    color: #fff;
+    height: 40px;
+    border: none;
+}
+
+.chat .messageSendDiv .message {
+    background: transparent;
+    border:1px solid #9a9898;
+    width: 400px;
+    height: 40px;
+    float: left;
+    margin-left: 10px;
+    font-size: 17px;
+    padding-left: 4px;
+}
+
+.chat .shoMessagesArea {
+    height: calc(100vh - 133px);
+}
+
+.appBarClass {
+    background-color: rgb( 57, 106, 156) !important;
+}
+.appBarClass h1 {
+    height: 42px !important;
+    margin-top: 1px !important;
+    line-height: 45px !important;
+}
+.appBarClass>div{
+    margin-top: 2px !important;
+}
+.appBarClass>div > button {
+        /*margin-top: 1px !important;*/
+}
+.appbarTime {
+    color: #fff;
+}
+.shoMessagesArea .chats {
+    height: calc(100vh - 133px);
+    overflow: auto;
+    margin-top: 0px;
+    padding-left: 10px;
+    padding-top: 19px;
+    box-sizing: border-box;
+}
+.centertArea {
+    width: calc(71% - 160px);
+}
+.hidden {
+    display: none;
+}
+
+.appBarClass > div:nth-child(3) > button > div > span {
+    text-transform: capitalize !important;
+    font-size: 16px !important;
+}
