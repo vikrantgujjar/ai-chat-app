@@ -5,6 +5,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import axios from 'axios';
 import Login from './Login';
+import appConfig from './config/appConfig';
 
 const style={
   margin: 15,
@@ -23,7 +24,6 @@ class Register extends Component {
     console.log("nextProps",nextProps);
   }
   handleClick(event,role){
-    var apiBaseUrl="http://localhost:4000/api/";
     // console.log("values in register handler",role);
     var self=this;
     //To be done:check for empty values before hitting submit
@@ -35,7 +35,7 @@ class Register extends Component {
       "password":this.state.password,
       "role":role
       }
-      axios.post(apiBaseUrl+'/register', payload)
+      axios.post(appConfig.apiBaseUrl+'/register', payload)
      .then(function (response) {
        console.log(response);
        if(response.data.code === 200){

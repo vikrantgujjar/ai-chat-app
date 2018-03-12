@@ -1,114 +1,34 @@
-var mysql = require('mysql');
-// var nodemailer = require('nodemailer');
-// var transporter = nodemailer.createTransport({
-//   service: 'gmail',
-//   auth: {
-//     user: '*****@gmail.com',
-//     pass: '******@1'
-//   }
-// });
-// var bcrypt = require('bcrypt');
-// var jsonfile = require('jsonfile');
 const fs = require('fs');
 var requestify = require('requestify'); 
 
-// var connection = mysql.createConnection({
-//   host     : 'localhost',
-//   user     : 'root',
-//   password : '',
-//   database : 'clstdb',
-//   insecureAuth: false
-// });
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/aics');
 
-// connection.connect(function(err){
-// if(!err) {
-//     console.log("Database is connected ... nn");
-// } else {
-//     console.log("Error connecting database ... nn",err);
-// }
-// });
-
-
-var connection;
-
-function handleDisconnect() {
-
-  connection = mysql.createConnection({
-                  host     : 'localhost',
-                  user     : 'root',
-                  password : 'root',
-                  database : 'clstdb',
-                  insecureAuth: false
-                });
-
-  connection.connect(function(err) {              // The server is either down
-    if(err) {                                     // or restarting (takes a while sometimes).
-      console.log('error when connecting to db:', err);
-       // We introduce a delay before attempting to reconnect,
-    }                                     // to avoid a hot loop, and to allow our node script to
-  });                                     // process asynchronous requests in the meantime.
-                                          // If you're also serving http, display a 503 error.
-  connection.on('error', function(err) {
-    console.log('db error', err);
-    if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
-      handleDisconnect();                         // lost due to either server restart, or a
-    } else {                                      // connnection idle timeout (the wait_timeout
-      throw err;                                  // server variable configures this)
-    }
-  });
-}
-
-handleDisconnect();
+var Muser = require('../model/musers');
 
 exports.register = function(req,res){
-  // console.log("req",req.body);
   var today = new Date();
-  // bcrypt.hash(req.body.password, 5, function( err, bcryptedPassword) {
-   //save to db
-   var users={
-     "first_name":req.body.first_name,
-     "last_name":req.body.last_name,
-     "email":req.body.email,
-     "password":req.body.password,
-     "created":today,
-     "modified":today
-   }
-   connection.query('INSERT INTO musers SET ?',users, function (error, results, fields) {
-   if (error) {
+  var muser = new Muser();
+  muser.first_name=req.body.first_name;
+  muser.last_name=req.body.last_name;
+  muser.email=req.body.email;
+  muser.password=req.body.password;
+  muser.created=today;
+  muser.modified=today;
+  muser.save(function(error) {
+     if (error) {
      console.log("error ocurred",error);
      res.send({
        "code":400,
        "failed":"error ocurred"+error
      })
-   }else{
-    //  console.log('The solution is: ', results);
-
-    //send verification email
-    // var mailOptions = {
-    //   from: 'vikrant08081992@gmail.com',
-    //   to: 'vikrant.rise@gmail.com',
-    //   subject: 'Sending Email using Node.js',
-    //   text: 'That was easy!'
-    // };
-
-    // transporter.sendMail(mailOptions, function(error, info){
-    //   if (error) {
-    //     console.log(error);
-    //   } else {
-    //     // console.log('Email sent: ' + info.response);
-       
-    //   }
-    // });
-
-      res.send({
-         "code":200,
-         "success":"user registered sucessfully"
-           });
-   }
+     }else{
+             res.send({
+           "code":200,
+           "success":"user registered sucessfully"
+             });
+     }
    });
-  // });
-
-
 }
 
 exports.login = function(req,res){
@@ -116,45 +36,47 @@ exports.login = function(req,res){
   var password = req.body.password;
   var role = req.body.role;
   var rememberme = req.body.rememberme;
-  connection.query('SELECT * FROM musers WHERE email = ?',[email], function (error, results, fields) {
-  if (error) {
-    console.log("error ocurred",error);
-    res.send({
-      "code":400,
-      "failed":"error ocurred"
-    })
-  }else{
-    // console.log('The solution is: ', results[0].password,req.body.password,req.body.role);
-    if(results.length >0){
-      if(results[0].password == req.body.password){
-        console.log(rememberme);
-          if(rememberme=== true){
-            req.session.user = results[0];
-          }
-          res.send({
-            "code":200,
-            "success":"login sucessfull"
-          })
-      }
-      else{
-        // code 200 for testing actul code 204 for error
+
+   Muser.find({email: email}, function(error, muser) {
+      if (error) {
+        console.log("error ocurred",error);
         res.send({
-             "code":20,
-             "success":"Email and password does not match "
+          "code":400,
+          "failed":"error ocurred"
         })
-      }
+      }else{
+          // console.log('The solution is: ', muser);
+          // console.log('The solution length is: ', muser[0].password);
+          if(muser.length >0){
+            if(muser[0].password == req.body.password){
+              // console.log(rememberme);
+                if(rememberme=== true){
+                  req.session.user = muser[0];
+                }
+                res.send({
+                  "code":200,
+                  "success":"login sucessfull"
+                })
+            }
+            else{
+              // code 200 for testing actul code 204 for error
+              res.send({
+                   "code":20,
+                   "success":"Email and password does not match "
+              })
+            }
 
-    }
-    else{
-      res.send({
-        "code":204,
-        "success":"Email does not exits"
-      });
-    }
+          }
+          else{
+            res.send({
+              "code":204,
+              "success":"Email does not exits"
+            });
+          }
 
 
-  }
-  });
+        }
+    });
 }
 
 
@@ -176,7 +98,7 @@ exports.islogin = function(req,res){
 }
 exports.getUserData = function(req,res){
   // console.log('Cookies: ', req.cookies);
-  console.log(req.session);
+  // console.log(req.session);
   if (req.session.user) {
       res.send({
         "code":200,
@@ -223,14 +145,14 @@ console.log('END ------------- ');
 }
 exports.readfile = function(req,res){
   var filename= req.body.filename;
-  var url = '../files/'+filename+'.htm';
+  var url = '../docs/'+filename+'.htm';
   var terror = false;
   var tdata = '';
 
   fs.readFile(url,'utf8', (err, fd) => {
     if (err){
      terror=err;
-     console.log('Cookies: ', err);
+     // console.log('Cookies: ', err);
      res.send({
           "output": ""+terror,
           "success": false

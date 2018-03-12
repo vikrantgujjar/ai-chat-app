@@ -12,8 +12,7 @@ import LoginScreen from './Loginscreen';
 import IconButton from 'material-ui/IconButton';
 import FlatButton from 'material-ui/FlatButton';
 import Navigation from 'material-ui/svg-icons/navigation/menu';
-// var apiBaseUrl = "http://localhost:4000/api/";
-var apiBaseUrl = "http://138.68.50.25:4000/api/";
+import appConfig from './config/appConfig';
 
 class App extends Component {
   constructor(props) {
@@ -35,7 +34,7 @@ class App extends Component {
   }
   componentWillMount(){
     var appCont = this;
-    axios.get(apiBaseUrl+'getUserData', {withCredentials: true})
+    axios.get(appConfig.apiBaseUrl+'getUserData', {withCredentials: true})
    .then(function (response) {
      if(response.data.code === 200){
         appCont.setState({username: response.data.user.first_name})
@@ -75,7 +74,7 @@ class App extends Component {
       break;
       case "logout":
       var isError = false;
-        axios.get(apiBaseUrl+'logout', {withCredentials: true})
+        axios.get(appConfig.apiBaseUrl+'logout', {withCredentials: true})
        .then(function (response) {
          console.log(response);
          if(response.data.code === 200){

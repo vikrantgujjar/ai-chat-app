@@ -1,8 +1,9 @@
 var express    = require("express");
 var login = require('./routes/loginroutes');;
+var dbapp = require('./routes/dbapproutes');;
 var bodyParser = require('body-parser');
 var session = require('express-session');
-var MySQLStore = require('express-mysql-session')(session);
+var MongoStore = require('connect-mongo')(session);
 var cookieParser = require('cookie-parser');
 var cors = require('cors');
 
@@ -10,29 +11,20 @@ var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// app.use(function(req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     next();
-// });
-// var corsOptions = {
-//   credentials: true, origin: 'http://localhost:3000'
-// }
-
 var corsOptions = {
-  credentials: true, origin: 'http://138.68.50.25:3000'
+  credentials: true, origin: 'http://localhost:3001'
 }
+
+// var corsOptions = {
+//   credentials: true, origin: 'http://138.68.50.25:3000'
+// }
 app.use(cors(corsOptions));
 
 var options = {
-    host: 'localhost',
-    port: 3306,
-    user: 'root',
-    password: 'root',
-    database: 'clstdb'
+    url: 'mongodb://localhost/aics'
 };
  
-var sessionStore = new MySQLStore(options);
+var sessionStore = new MongoStore(options);
 
 app.use(cookieParser());
 app.use(session({
@@ -60,5 +52,13 @@ router.get('/logout',login.logout);
 router.post('/sendmessage',login.sendmessage);
 router.post('/readfile',login.readfile);
 router.get('/getUserData',login.getUserData);
+
+
+
+// routes for dbapp
+router.get('/getMenu',dbapp.getMenu);
+router.get('/createMenu',dbapp.createMenu);
+
+
 app.use('/api', router);
-app.listen(4000);
+app.listen(4001);
