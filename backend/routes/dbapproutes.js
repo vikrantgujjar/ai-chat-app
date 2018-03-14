@@ -5,11 +5,18 @@ var mysql = require('mysql');
 var connection;
 function handleDisconnect() {
 
+	// connection = mysql.createConnection({
+	// 								host     : 'localhost',
+	// 								user     : 'root',
+	// 								password : '',
+	// 								database : 'demoapp',
+	// 								insecureAuth: false
+	// 							});
 	connection = mysql.createConnection({
 									host     : 'localhost',
 									user     : 'root',
 									password : 'root',
-									database : 'demoapp',
+									database : 'default',
 									insecureAuth: false
 								});
 
