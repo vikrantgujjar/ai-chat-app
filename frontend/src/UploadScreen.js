@@ -141,6 +141,13 @@ class UploadScreen extends Component {
 			self.setState({toggleClassCenterArea:'dbappCentertArea float-col-3 '});
 			ReactDOM.findDOMNode(this.refs.msg).value = "";
 		}
+		if (inputmsg.toLowerCase()=='exit dbapp') {
+			self.setState({isChatActive:true});
+			self.setState({toggleClassRightArea:'righttArea float-col-3 '});
+			self.setState({toggleClassDbAppRightArea:'dbApprighttArea float-col-3 hidden'});
+			self.setState({toggleClassCenterArea:'centertArea float-col-3 '});
+			ReactDOM.findDOMNode(this.refs.msg).value = "";
+		}
 
 
 		if (inputmsg.toLowerCase() !='build dbapp' && self.state.isChatActive) {
