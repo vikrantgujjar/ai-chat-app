@@ -11,13 +11,13 @@ var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-var corsOptions = {
-  credentials: true, origin: 'http://localhost:3001'
-}
-
 // var corsOptions = {
-//   credentials: true, origin: 'http://138.68.50.25:3000'
+//   credentials: true, origin: 'http://localhost:3001'
 // }
+
+var corsOptions = {
+  credentials: true, origin: 'http://138.68.50.25:3001'
+}
 app.use(cors(corsOptions));
 
 var options = {
@@ -58,6 +58,7 @@ router.get('/getUserData',login.getUserData);
 // routes for dbapp
 router.get('/getMenu',dbapp.getMenu);
 router.get('/createMenu',dbapp.createMenu);
+router.post('/getTables',dbapp.getTables);
 
 
 app.use('/api', router);

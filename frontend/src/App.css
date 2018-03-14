@@ -220,6 +220,7 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
     height: calc(100vh - 53px);
     width: calc(100% - 635px);
     background: #eee;
+    overflow: auto;
 }
 
 .dbappmenu {
@@ -244,4 +245,14 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
     border-top: 3px solid #F48024;
     box-shadow: 0 1px 0 rgba(12,13,14,0.15), 0 0 0 transparent, 0 0 0 transparent, 0 0 0 transparent;
     background-color: #fafafb;
+}
+
+.DbAppSingleTable {
+    width: 90%;
+    margin: 26px auto;
+}
+
+.DBappTablepanelheading {
+    background: #ccc;
+    padding: 4px 0px 6px 14px;
 }

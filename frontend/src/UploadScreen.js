@@ -11,6 +11,7 @@ import FontIcon from 'material-ui/FontIcon';
 import {blue500, red500, greenA200} from 'material-ui/styles/colors';
 import Message from './components/Message.js';
 import DbAppMenu from './components/DbAppMenu.js';
+import DbAppTable from './components/DbAppTable.js';
 import axios from 'axios';
 import appConfig from './config/appConfig';
 
@@ -24,12 +25,15 @@ class UploadScreen extends Component {
 			filename:'Filename',
 			filecontent:'',
 			toggleClassRightArea:'righttArea float-col-3 hidden',
-			toggleClassDbAppRightArea:'dbApprighttArea float-col-3',
-			toggleClassCenterArea:'dbappCentertArea float-col-3 ',
+			toggleClassDbAppRightArea:'dbApprighttArea float-col-3 hidden',
+			toggleClassCenterArea:'centertArea float-col-3 ',
 			chats: [],
 			isChatActive: true,
 			username: '',
-			DbMenus: [{item:'pidf'},{item:'pidfl'}]
+			DbMenus: [{item:'pidf'},{item:'pidfl'}],
+			activemenu: false,
+			showtables:'',
+			tablesdata:[]
 		}
 
 		this.submitMessage = this.submitMessage.bind(this);
@@ -37,11 +41,11 @@ class UploadScreen extends Component {
 
 
 	componentWillMount(){
-		var appCont = this;
+		var self = this;
 		axios.get(appConfig.apiBaseUrl+'getUserData', {withCredentials: true})
 		 .then(function (response) {
 			 if(response.data.code === 200){
-					appCont.setState({username: response.data.user.first_name})
+					self.setState({username: response.data.user.first_name})
 			 }
 			 else if(response.data.code === 204){
 			 }
@@ -57,10 +61,18 @@ class UploadScreen extends Component {
 		axios.get(appConfig.apiBaseUrl+'getMenu', {withCredentials: true})
 		 .then(function (response) {
 			if(response.data.code === 200){
-				 appCont.setState({DbMenus:response.data.menus}, () => {
-							ReactDOM.findDOMNode(appCont.refs.msg).value = "";
+				 self.setState({DbMenus:response.data.menus}, () => {
+							ReactDOM.findDOMNode(self.refs.msg).value = "";
 					});
-				 // console.log(appCont.state.DbMenus);
+				 
+
+				 self.state.DbMenus.map((menu) => {
+					    if(menu.current){
+					    	self.setState({showtables: menu.tableId});
+					    }
+					});
+				 self.reloadTables();
+				 console.log(self.state.showtables);
 			 }
 			 else if(response.data.code === false){
 				 console.log("Email password do not match");
@@ -76,6 +88,35 @@ class UploadScreen extends Component {
 		 });
 	}
 
+	reloadTables(){
+		var self = this;
+
+		var payload={
+				tables:self.state.showtables
+			}
+		axios.post(appConfig.apiBaseUrl+'getTables',payload, {withCredentials: true})
+		 .then(function (response) {
+			if(response.data.code === 200){
+				 self.setState({tablesdata:response.data.tables}, () => {
+							ReactDOM.findDOMNode(self.refs.msg).value = "";
+					});
+
+				 let asdfg =self.state.DbMenus
+				 console.log(typeof asdfg);
+			 }
+			 else if(response.data.code === false){
+				 console.log("Email password do not match");
+				 // self.setState({filecontent:'error occured '+response.data.output})
+			 }
+			 // else{
+			 //   console.log("Email does not exists");
+			 //   alert("Email does not exist");
+			 // }
+		 })
+		 .catch(function (error) {
+			 console.log(error);
+		 });
+	}
 
 	componentDidMount() {
 			this.scrollToBot();
@@ -94,7 +135,11 @@ class UploadScreen extends Component {
 		let inputmsg = ReactDOM.findDOMNode(this.refs.msg).value;
 		inputmsg = inputmsg.trim();
 		if (inputmsg.toLowerCase()=='build dbapp') {
-			self.setState({isChatActive:false})
+			self.setState({isChatActive:false});
+			self.setState({toggleClassRightArea:'righttArea float-col-3 hidden'});
+			self.setState({toggleClassDbAppRightArea:'dbApprighttArea float-col-3'});
+			self.setState({toggleClassCenterArea:'dbappCentertArea float-col-3 '});
+			ReactDOM.findDOMNode(this.refs.msg).value = "";
 		}
 
 
@@ -195,6 +240,7 @@ class UploadScreen extends Component {
 	render() {
 		const { chats } = this.state;
 		const { DbMenus } = this.state;
+		const { tablesdata } = this.state;
 		return (
 			<div className="chat clearfix">
 					<div>
@@ -236,7 +282,16 @@ class UploadScreen extends Component {
 									    <li className={`dbAppMenuItem ${DbMenus.length > 0 ? "" : "active"}`}><a href="#" >all</a></li>
 								</ul>
 							</div>
-							<div className="openFileArea"  dangerouslySetInnerHTML={{__html: this.state.filecontent}}>
+							<div className="dbapptableswrapper">
+								{
+											tablesdata.map((table) =>
+												<div className="DbAppSingleTable">
+													<MuiThemeProvider>
+														<DbAppTable table={table}  />
+													</MuiThemeProvider>
+												</div>
+											)
+									}
 							</div>
 						</div>
 
