@@ -150,7 +150,7 @@ class UploadScreen extends Component {
 		}
 
 
-		if (inputmsg.toLowerCase() !='build dbapp' && self.state.isChatActive) {
+		if (inputmsg.toLowerCase() !='build dbapp' && inputmsg.toLowerCase() !='exit dbapp' && self.state.isChatActive) {
 			// --------------------------------------------------------------------------------------------------------------
 			// --------------------------------------------------------------------------------------------------------------
 			// ---------------------------------------------------------------------------Here start chat code -----------//

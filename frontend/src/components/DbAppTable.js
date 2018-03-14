@@ -24,7 +24,7 @@ import FontIcon from 'material-ui/FontIcon';
 	};
 
 	const colWidth = {
-	    width: '50px'
+	    width: '100px'
 	};
 // export default DbAppMenu;
 class DbAppTable extends Component {
