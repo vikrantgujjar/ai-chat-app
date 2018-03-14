@@ -35,7 +35,7 @@ handleDisconnect();
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/aics');
 
-var MainMenu = require('../model/MainMenu');
+var MainMenu = require('../model/mainMenu');
 var alltables = require('../model/alltables');
 
 exports.getMenu = function(req,res){
