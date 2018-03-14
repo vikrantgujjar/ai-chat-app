@@ -140,7 +140,7 @@ exports.getTables =  function(req, res){
 
 								superhero+= 1;
 								if (superhero==tables.length) {
-									console.log(alltables);
+									// console.log(alltables);
 									res.send({
 										 "code":200,
 										 "success":true,
@@ -153,53 +153,12 @@ exports.getTables =  function(req, res){
 						});
 					}
 				});
-				// console.log("alltables ========",aalltables);
 
 			});
-			// console.log("alltables ========",alltables);
 		}
 	});
 
 
 
-	// connection.query('SELECT * FROM musers WHERE email = ?',[email], function (error, results, fields) {
-	// if (error) {
-	// 	console.log("error ocurred",error);
-	// 	res.send({
-	// 		"code":400,
-	// 		"failed":"error ocurred"
-	// 	})
-	// }else{
-	// 	// console.log('The solution is: ', results[0].password,req.body.password,req.body.role);
-	// 	if(results.length >0){
-	// 		if(results[0].password == req.body.password){
-	// 			console.log(rememberme);
-	// 				if(rememberme=== true){
-	// 					req.session.user = results[0];
-	// 				}
-	// 				res.send({
-	// 					"code":200,
-	// 					"success":"login sucessfull"
-	// 				})
-	// 		}
-	// 		else{
-	// 			// code 200 for testing actul code 204 for error
-	// 			res.send({
-	// 					 "code":20,
-	// 					 "success":"Email and password does not match "
-	// 			})
-	// 		}
-
-	// 	}
-	// 	else{
-	// 		res.send({
-	// 			"code":204,
-	// 			"success":"Email does not exits"
-	// 		});
-	// 	}
-
-
-	// }
-	// });
 
 }
