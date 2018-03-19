@@ -139,6 +139,7 @@ class UploadScreen extends Component {
 		 .then(function (response) {
 			console.log(response);
 			if(response.data.success === true || response.data.code ===200){
+				ReactDOM.findDOMNode(self.refs.msg).value='';
 				console.log("data sent successfull");
 				alert(response.data.message);
 				self.reloadTables();
