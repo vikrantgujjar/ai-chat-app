@@ -25,8 +25,8 @@ class UploadScreen extends Component {
 			filename:'Filename',
 			filecontent:'',
 			toggleClassRightArea:'righttArea float-col-3 hidden',
-			toggleClassDbAppRightArea:'dbApprighttArea float-col-3',
-			toggleClassCenterArea:'dbappCentertArea float-col-3 ',
+			toggleClassDbAppRightArea:'dbApprighttArea float-col-3 hidden',
+			toggleClassCenterArea:'centertArea float-col-3 ',
 			chats: [],
 			isChatActive: false,
 			username: '',
@@ -479,7 +479,7 @@ class UploadScreen extends Component {
 							</div>
 							<div className="messageSendDiv">
 								<form className="messageForm" onSubmit={(e) => this.submitMessage(e)}  ref="messageFormRef">
-									<textarea  className="message" ref="msg" onKeyUp={this.submitMessage}>table: </textarea>
+									<textarea  className="message" ref="msg" onKeyUp={this.submitMessage}></textarea>
 									 <input type="submit" className="submitbutton" value="Submit" />
 								</form>
 							</div>
