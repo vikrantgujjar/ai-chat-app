@@ -424,7 +424,11 @@ exports.showBlock = function(req,res){
 
     	}
     }else{
-    		connection.query("UPDATE "+alltablesDef+" SET ishidden=false WHERE tablename='"+blockName+"' and schema_name='"+schema+"'", function (error,blocks) {
+    	var showQueryAllSchema = "UPDATE "+alltablesDef+" SET ishidden=false WHERE tablename='"+blockName+"'";
+    	if(!hideAll){
+    		showQueryAllSchema += " AND schema_name='"+schema+"'";
+    	}
+    		connection.query(showQueryAllSchema, function (error,blocks) {
 				if (error) {
 					    res.send({
 							"code":400,
