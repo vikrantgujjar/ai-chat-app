@@ -842,7 +842,9 @@ exports.getTables =  function(req, res){
 				"message":"error ocurred"
 			})
 		}else{
+			var issuperher = true;
 			tables.forEach(function(table) {
+				issuperher = false;
 				var tablename = table.tablename;
 				var tableschema = table.schema_name;
 
@@ -893,6 +895,13 @@ exports.getTables =  function(req, res){
 				});
 
 			});
+			if(issuperher){
+				res.send({
+					 "code":200,
+					 "success":true,
+					 "tables":alltables
+						 });
+			}
 		}
 	});
 
