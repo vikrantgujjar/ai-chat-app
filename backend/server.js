@@ -59,6 +59,9 @@ router.get('/getUserData',login.getUserData);
 router.get('/getMenu',dbapp.getMenu);
 router.get('/createMenu',dbapp.createMenu);
 router.post('/getTables',dbapp.getTables);
+router.post('/createTables',dbapp.createTables);
+router.post('/hideBlock',dbapp.hideBlock);
+router.post('/showBlock',dbapp.showBlock);
 
 
 app.use('/api', router);

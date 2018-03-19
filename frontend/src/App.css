@@ -213,12 +213,17 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
 /*----------------   DBAPP  STYLE*/
 
 .dbappCentertArea {
-    width: 475px;
+    width: 487px;
+    max-height: calc(100vh - 53px);
+    overflow: auto;
+}
+.centertArea {
+    max-height: calc(100vh - 53px);
 }
 
 .dbApprighttArea {
     height: calc(100vh - 53px);
-    width: calc(100% - 635px);
+    width: calc(100% - 647px);
     background: #eee;
     overflow: auto;
 }
@@ -255,4 +260,81 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
 .DBappTablepanelheading {
     background: #ccc;
     padding: 4px 0px 6px 14px;
+}
+
+
+.resTableContainer {
+    overflow-x:auto;
+}
+
+
+
+.resTableContainer table {
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  table-layout: fixed;
+}
+.resTableContainer table caption {
+  font-size: 1.5em;
+  margin: .5em 0 .75em;
+}
+.resTableContainer table tr {
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: .35em;
+}
+.resTableContainer table th,
+.resTableContainer table td {
+  padding: .625em;
+  text-align: center;
+}
+.resTableContainer table th {
+  font-size: .85em;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+@media screen and (max-width: 600px) {
+  .resTableContainer table {
+    border: 0;
+  }
+  .resTableContainer table caption {
+    font-size: 1.3em;
+  }
+  .resTableContainer table thead {
+    border: none;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+  .resTableContainer table tr {
+    border-bottom: 3px solid #ddd;
+    display: block;
+    margin-bottom: .625em;
+  }
+  .resTableContainer table td {
+    border-bottom: 1px solid #ddd;
+    display: block;
+    font-size: .8em;
+    text-align: right;
+  }
+  .resTableContainer table td:before {
+    /*
+    * aria-label has no advantage, it won't be read inside a table
+    content: attr(aria-label);
+    */
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .resTableContainer table td:last-child {
+    border-bottom: 0;
+  }
 }
