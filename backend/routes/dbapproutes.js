@@ -331,7 +331,11 @@ exports.hideBlock = function(req,res){
 
     	}
     }else{
-    		connection.query("UPDATE "+alltablesDef+" SET ishidden=true WHERE tablename='"+blockName+"' and schema_name='"+schema+"'", function (error,blocks) {
+    	var hideQueryAllSchema = "UPDATE "+alltablesDef+" SET ishidden=true WHERE tablename='"+blockName+"'";
+    	if(!hideAll){
+    		hideQueryAllSchema += " AND schema_name='"+schema+"'";
+    	}
+    		connection.query(hideQueryAllSchema, function (error,blocks) {
 				if (error) {
 					    res.send({
 							"code":400,
