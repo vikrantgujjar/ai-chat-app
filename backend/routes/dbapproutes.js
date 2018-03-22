@@ -422,7 +422,6 @@ exports.foreignColumnValue = function(req,res){
 				"message":"error ocurred"
 			})
 		}else{
-			console.log(tabledata[0][field]);
 			if(tabledata.length >= 1){
 				res.send({
 				 "code":200,
@@ -458,15 +457,21 @@ exports.foreignFormSelect = function(req,res){
 				"message":"error ocurred"
 			})
 		}else{
+			var primaryValues = [];
 			var formSelectString = '<select className="'+classNameAttr+'" name="'+nameAttr+'">';
 			tabledata.forEach(function(row){
+				let primaryValue={};
+				primaryValue.id = row.id;
+				primaryValue.value = row[field];
+				primaryValues.push(primaryValue);
 				formSelectString += '<option value="'+row.id+'">'+row[field]+'</option>';
 			});
 			formSelectString += '</select>';
 				res.send({
 				 "code":200,
 				 "success":true,
-				 "formString":formSelectString
+				 "formString":formSelectString,
+				 "primaryValues":primaryValues
 				});
 		}
 	});
@@ -605,7 +610,7 @@ exports.createTables =  function(req, res){
             delete tableData[key];
         }
     }
-    console.log(tableData);
+    // console.log(tableData);
     if (typeof tableData.foreign !== 'undefined' && !(Object.keys(tableData.foreign).length === 0 && tableData.foreign.constructor === Object)  ) {
     	var eachForeignTableLoop = Object.keys(tableData.foreign).length;//  must be 0 to finish loop
 		Object.keys(tableData.foreign).forEach(function(key) {
@@ -711,7 +716,7 @@ exports.createTables =  function(req, res){
 														            });
 
 														            mainTableSql += " date TIMESTAMP)";
-														            console.log(mainTableSql);
+														            // console.log(mainTableSql);
 																}else{
 																	Object.keys(tableData).forEach(function(key) {
 																		eachForeignTableLoop--;
@@ -820,8 +825,7 @@ exports.createTables =  function(req, res){
 		});
 	}else{
 		delete tableData['foreign'];
-		console.log('sharm karo m aagya');
-		console.log(tableData);
+		// console.log(tableData);
 		var mainTableSql = "CREATE TABLE "+schemaName+'.'+tableName+" ( id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,";
 		if(Object.keys(tableData).length === 0 && tableData.constructor === Object){
 			defaultTableObj = JSON.parse(defaultTables);
@@ -856,7 +860,7 @@ exports.createTables =  function(req, res){
             });
 
             mainTableSql += " date TIMESTAMP)";
-            console.log(mainTableSql);
+            // console.log(mainTableSql);
 		}else{
 			Object.keys(tableData).forEach(function(key) {
 				eachForeignTableLoop--;
@@ -976,7 +980,7 @@ exports.getTables =  function(req, res){
 				var tablename = table.tablename;
 				var tableschema = table.schema_name;
 				var tablesishidden = table.ishidden;
-				console.log(table);
+				// console.log(table);
 				if(table.block_type == 'table'){
 					connection.query('SELECT * FROM '+tableschema+'.'+tablename, function (error, tabledata, fields) {
 						if (error) {
@@ -1016,7 +1020,7 @@ exports.getTables =  function(req, res){
 
 										superhero+= 1;
 										if (superhero==tables.length) {
-											console.log(alltables);
+											// console.log(alltables);
 											res.send({
 												 "code":200,
 												 "success":true,
@@ -1050,7 +1054,7 @@ exports.getTables =  function(req, res){
 							alltables.push(prepitem);
 							superhero+= 1;
 							if (superhero==tables.length) {
-								console.log(alltables);
+								// console.log(alltables);
 								res.send({
 									 "code":200,
 									 "success":true,

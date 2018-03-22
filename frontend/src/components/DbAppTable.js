@@ -95,7 +95,7 @@ class DbAppTable extends Component {
 								if(response3.data.success === true || response3.data.code ===200){
 									
 									// let localloginComponent=<div  dangerouslySetInnerHTML={{__html: response3.data.formString}}> </div>;
-									self.props.table.columns[key].formString = response3.data.formString;
+									self.props.table.columns[key].primaryValues = response3.data.primaryValues;
 								 }
 								 else if(response3.data.code === 400){
 									// console.log(response3.data);
@@ -213,7 +213,11 @@ class DbAppTable extends Component {
 											table.columns.map((field) =>
 												<td   style={ colWidth }>
 												{ field.foreign ? (
-														<div  dangerouslySetInnerHTML={{__html: field.formString}}></div>
+														<select>
+															field.primaryValues.map((option)=>{
+																	<option value={option.id} >{option.value}</option>
+																})
+														</select>
 									                ) : ( (function() {
 											                switch(field.name) {
 											                    case 'id':
