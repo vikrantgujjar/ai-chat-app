@@ -25,8 +25,8 @@ class UploadScreen extends Component {
 			filename:'Filename',
 			filecontent:'',
 			toggleClassRightArea:'righttArea float-col-3 hidden',
-			toggleClassDbAppRightArea:'dbApprighttArea float-col-3 hidden',
-			toggleClassCenterArea:'centertArea float-col-3 ',
+			toggleClassDbAppRightArea:'dbApprighttArea float-col-3 ',
+			toggleClassCenterArea:'dbappCentertArea float-col-3 ',
 			chats: [],
 			isChatActive: false,
 			username: '',
@@ -98,15 +98,20 @@ class UploadScreen extends Component {
 		axios.post(appConfig.apiBaseUrl+'getTables',payload, {withCredentials: true})
 		 .then(function (response) {
 			if(response.data.code === 200){
-				 self.setState({tablesdata:response.data.tables}, () => {
+
+				let asdfg =response.data.tables;
+				asdfg.sort(function(a, b){
+				    return a.tableId - b.tableId;
+				});
+				 self.setState({tablesdata:asdfg}, () => {
 							// ReactDOM.findDOMNode(self.refs.msg).value = "";
 					});
-
-				 let asdfg =self.state.DbMenus
-				 console.log(typeof asdfg);
+				 
+				 console.log(asdfg);
 			 }
-			 else if(response.data.code === false){
+			 else if(response.data.code === false || response.data.code === 400){
 				 console.log("Email password do not match");
+				 console.log(response.data);
 				 // self.setState({filecontent:'error occured '+response.data.output})
 			 }
 			 // else{

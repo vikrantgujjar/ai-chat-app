@@ -63,6 +63,11 @@ router.post('/createTables',dbapp.createTables);
 router.post('/hideBlock',dbapp.hideBlock);
 router.post('/showBlock',dbapp.showBlock);
 
+router.post('/foreignColumn',dbapp.foreignColumn);
+router.post('/foreignColumnValue',dbapp.foreignColumnValue);
+
+router.post('/foreignFormSelect',dbapp.foreignFormSelect);
+
 
 app.use('/api', router);
 app.listen(4001);

@@ -260,6 +260,14 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
 .DBappTablepanelheading {
     background: #ccc;
     padding: 4px 0px 6px 14px;
+    font-size: 18px;
+    text-transform: capitalize;
+}
+
+.DBappTablepanelheading .resTableSchema{
+    text-transform: uppercase;
+    font-size: 12px;
+    color: #2196F3;
 }
 
 
@@ -296,6 +304,21 @@ max-width: 1062px;
   font-size: .85em;
   letter-spacing: .1em;
   text-transform: uppercase;
+}
+
+
+.resHeadingText{
+    text-align: center;
+    text-transform: capitalize;
+}
+.DBappHeadingPanelhead{
+    text-align: center;
+    background: transparent;
+    border-top: 2px solid #2895a7;
+    margin: 0px -35px;
+}
+.headingBold {
+    font-weight: bold;
 }
 @media screen and (max-width: 600px) {
   .resTableContainer table {

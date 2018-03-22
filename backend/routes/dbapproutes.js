@@ -353,6 +353,126 @@ exports.hideBlock = function(req,res){
 			});
     }
 }
+exports.foreignColumn = function(req,res){
+	var columnName = req.body.column;
+	var schema = req.body.schema;
+	var foreignTable = columnName+'s';
+
+	connection.query('SELECT * FROM '+alltablesDef+' where tablename="'+foreignTable+'" AND schema_name="'+schema+'"', function (error, tabledata, fields) {
+		if (error) {
+			console.log("error ocurred inside table"+tablename + "  ---",error);
+			res.send({
+				"code":400,
+				"message":"error ocurred"
+			})
+		}else{
+			if(tabledata.length >= 1){
+				connection.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='"+schema+"' AND `TABLE_NAME`='"+foreignTable+"'", function (error, columns, fields) {
+					if (error) {
+						console.log("error ocurred inside table"+tablename + "  ---",error);
+						res.send({
+							"code":400,
+							"message":"error ocurred"
+						})
+					}else{
+
+							var fieldName = columnName+' id';
+							columns.every(function(column, index) {
+								let loopcolname = column.COLUMN_NAME;
+								if(loopcolname.toLowerCase().trim()=='name'){
+									fieldName = columnName+' name';
+									return false;
+								}else if(loopcolname.toLowerCase().trim()=='title'){
+									fieldName = columnName+' name';
+									return false;
+								}else{
+									return true;
+								}
+							});
+							res.send({
+							 "code":200,
+							 "success":true,
+							 "fieldName":fieldName
+							});
+					}
+				});
+			}else{
+				res.send({
+						"code":400,
+						"message":"NO table found"
+					})
+			}
+		}
+	});
+
+
+}
+exports.foreignColumnValue = function(req,res){
+	var rowId = req.body.id;
+	var schema = req.body.schema;
+	var foreignTable = req.body.table;
+	var field = req.body.field;
+	field = field.toLowerCase().trim();
+
+	connection.query('SELECT * FROM '+schema+'.'+foreignTable+' where id='+rowId, function (error, tabledata, fields) {
+		if (error) {
+			console.log("error ocurred inside table"+tablename + "  ---",error);
+			res.send({
+				"code":400,
+				"message":"error ocurred"
+			})
+		}else{
+			console.log(tabledata[0][field]);
+			if(tabledata.length >= 1){
+				res.send({
+				 "code":200,
+				 "success":true,
+				 "fieldValue":tabledata[0][field]
+				});
+			}else{
+				res.send({
+						"code":400,
+						"message":"NO Data found",
+						"fieldValue" : 'Not Found'
+					})
+			}
+		}
+	});
+
+
+}
+exports.foreignFormSelect = function(req,res){
+	var classNameAttr = req.body.class;
+	var idNameAttr = req.body.id;
+	var nameAttr = req.body.name;
+	var schema = req.body.schema;
+	var foreignTable = req.body.foreignTable;
+	var field = req.body.field;
+	field = field.toLowerCase().trim();
+
+	connection.query('SELECT * FROM '+schema+'.'+foreignTable, function (error, tabledata, fields) {
+		if (error) {
+			console.log("error ocurred inside table"+tablename + "  ---",error);
+			res.send({
+				"code":400,
+				"message":"error ocurred"
+			})
+		}else{
+			var formSelectString = '<select className="'+classNameAttr+'" name="'+nameAttr+'">';
+			tabledata.forEach(function(row){
+				formSelectString += '<option value="'+row.id+'">'+row[field]+'</option>';
+			});
+			formSelectString += '</select>';
+				res.send({
+				 "code":200,
+				 "success":true,
+				 "formString":formSelectString
+				});
+		}
+	});
+
+
+}
 exports.showBlock = function(req,res){
 	var hideDesc = req.body.postData;
 	var blockName = hideDesc.blockName;
@@ -842,7 +962,7 @@ exports.getTables =  function(req, res){
 	}
 	alltables= [];
 	superhero = 0;
-	connection.query('SELECT * FROM tables where block_type="table" AND ishidden=false', function (error, tables, fields) {
+	connection.query('SELECT * FROM '+alltablesDef, function (error, tables, fields) {
 		if (error) {
 			console.log("error ocurred",error);
 			res.send({
@@ -855,52 +975,95 @@ exports.getTables =  function(req, res){
 				issuperher = false;
 				var tablename = table.tablename;
 				var tableschema = table.schema_name;
+				var tablesishidden = table.ishidden;
+				console.log(table);
+				if(table.block_type == 'table'){
+					connection.query('SELECT * FROM '+tableschema+'.'+tablename, function (error, tabledata, fields) {
+						if (error) {
+							console.log("error ocurred inside table"+tablename + "  ---",error);
+							res.send({
+								"code":400,
+								"message":"error ocurred"
+							})
+						}else{
 
-				connection.query('SELECT * FROM '+tableschema+'.'+tablename, function (error, tabledata, fields) {
-					if (error) {
-						console.log("error ocurred inside table"+tablename + "  ---",error);
-						res.send({
-							"code":400,
-							"message":"error ocurred"
-						})
-					}else{
-
-						connection.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='"+tableschema+"' AND `TABLE_NAME`='"+tablename+"'", function (error, columns, fields) {
-							if (error) {
-								console.log("error ocurred inside table"+tablename + "  ---",error);
-								res.send({
-									"code":400,
-									"message":"error ocurred"
-								})
-							}else{
-								prepitem = {};
-								fields= [];
-								columns.forEach(function(column){
-									fields.push(column.COLUMN_NAME);
-								});
-								prepitem.name = tablename;
-								prepitem.columns = fields;
-								prepitem.schema = tableschema;
-								prepitem.data = tabledata;
-								alltables.push(prepitem);
-								// tables.forEach(function(table) {
-								// });
-
-								superhero+= 1;
-								if (superhero==tables.length) {
-									// console.log(alltables);
+							connection.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='"+tableschema+"' AND `TABLE_NAME`='"+tablename+"'", function (error, columns, fields) {
+								if (error) {
+									console.log("error ocurred inside table"+tablename + "  ---",error);
 									res.send({
-										 "code":200,
-										 "success":true,
-										 "tables":alltables
-											 });
-								} else {
+										"code":400,
+										"message":"error ocurred"
+									})
+								}else{
 
+										prepitem = {};
+										fields= [];
+										columns.forEach(function(column){
+											let colForLoop = {};
+											colForLoop.name = column.COLUMN_NAME
+											fields.push(colForLoop);
+										});
+										prepitem.blocktype = 'table';
+										prepitem.name = tablename;
+										prepitem.tableId = table.id;
+										prepitem.ishidden = tablesishidden;
+										prepitem.columns = fields;
+										prepitem.schema = tableschema;
+										prepitem.data = tabledata;
+										alltables.push(prepitem);
+										// tables.forEach(function(table) {
+										// });
+
+										superhero+= 1;
+										if (superhero==tables.length) {
+											console.log(alltables);
+											res.send({
+												 "code":200,
+												 "success":true,
+												 "tables":alltables
+													 });
+										} else {
+
+										}
 								}
+							});
+						}
+					});
+				}else if(table.block_type == 'heading'){
+					connection.query('SELECT * FROM '+headingsDef+' WHERE id='+tablename, function (error, headings, fields) {
+						if (error) {
+							console.log("error ocurred inside table"+tablename + "  ---",error);
+							res.send({
+								"code":400,
+								"message":"error ocurred while fetching heading, id-"+tablename,
+								"error" : error
+							})
+						}else{
+							prepitem = {};
+							prepitem.blocktype = 'heading';
+							prepitem.name = tablename;
+							prepitem.tableId = table.id;
+							prepitem.heading = headings[0].heading;
+							prepitem.isbold = headings[0].bold;
+							prepitem.ishidden = tablesishidden;
+							prepitem.schema = tableschema;
+							alltables.push(prepitem);
+							superhero+= 1;
+							if (superhero==tables.length) {
+								console.log(alltables);
+								res.send({
+									 "code":200,
+									 "success":true,
+									 "tables":alltables
+										 });
+							} else {
+
 							}
-						});
-					}
-				});
+
+						}
+					});
+
+				}
 
 			});
 			if(issuperher){
