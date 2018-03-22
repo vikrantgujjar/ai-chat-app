@@ -235,7 +235,6 @@ class DbAppTable extends Component {
 											                    	return  <input type="text" />;
 											                }
 											            })()
-									                )
 									            }
 
 												</td>
