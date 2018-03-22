@@ -213,15 +213,17 @@ class DbAppTable extends Component {
 										{
 											table.columns.map((field) =>
 												<td   style={ colWidth }>
-												{ field.foreign ? (
+												{ field.foreign &&
 														<select>
 															{
-																field.primaryValues.map((optionrec)=>{
+																field.primaryValues.map((optionrec)=>
 																	<option value={optionrec.id} >{optionrec.value}</option>
-																})
+																)
 															}
 														</select>
-									                ) : ( (function() {
+												}
+												{ field.foreign=='undefined' &&
+									                 (function() {
 											                switch(field.name) {
 											                    case 'id':
 											                        return 'Auto fill';
