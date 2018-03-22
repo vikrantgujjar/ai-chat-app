@@ -96,6 +96,7 @@ class DbAppTable extends Component {
 									
 									// let localloginComponent=<div  dangerouslySetInnerHTML={{__html: response3.data.formString}}> </div>;
 									self.props.table.columns[key].primaryValues = response3.data.primaryValues;
+									console.log(response3.data.primaryValues);
 								 }
 								 else if(response3.data.code === 400){
 									// console.log(response3.data);
@@ -215,8 +216,8 @@ class DbAppTable extends Component {
 												{ field.foreign ? (
 														<select>
 															{
-																field.primaryValues.map((option)=>{
-																	<option value={option.id} >{option.value}</option>
+																field.primaryValues.map((optionrec)=>{
+																	<option value={optionrec.id} >{optionrec.value}</option>
 																})
 															}
 														</select>
