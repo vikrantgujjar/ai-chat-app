@@ -466,7 +466,7 @@ exports.foreignFormSelect = function(req,res){
 				primaryValues.push(primaryValue);
 				formSelectString += '<option value="'+row.id+'">'+row[field]+'</option>';
 			});
-			console.log(primaryValues);
+			// console.log(primaryValues);
 			formSelectString += '</select>';
 				res.send({
 				 "code":200,
