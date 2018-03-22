@@ -214,9 +214,11 @@ class DbAppTable extends Component {
 												<td   style={ colWidth }>
 												{ field.foreign ? (
 														<select>
-															field.primaryValues.map((option)=>{
+															{
+																field.primaryValues.map((option)=>{
 																	<option value={option.id} >{option.value}</option>
 																})
+															}
 														</select>
 									                ) : ( (function() {
 											                switch(field.name) {
