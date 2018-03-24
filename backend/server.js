@@ -60,7 +60,7 @@ router.get('/getMenu',dbapp.getMenu);
 router.get('/createMenu',dbapp.createMenu);
 router.post('/getTables',dbapp.getTables);
 router.post('/createTables',dbapp.createTables);
-router.post('/hideBlock',dbapp.hideBlock);
+router.post('/hideBlock',dbapp.hideBlock);  
 router.post('/showBlock',dbapp.showBlock);
 
 router.post('/foreignColumn',dbapp.foreignColumn);
