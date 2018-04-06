@@ -141,6 +141,7 @@ class DbAppTable extends Component {
 							dialogFormHtml.push(
 								<div className="formgroup">
 									<select className="" name={oneField.name}>
+									<option>Choose {oneField.name}</option>
 									{
 										primaryValueArray.map((optionData) =>
 																<option value={optionData.id}>{optionData.value}</option>
@@ -167,7 +168,7 @@ class DbAppTable extends Component {
 					if(oneField.name != 'id' && oneField.name != 'date'){
 						dialogFormHtml.push(
 							<div  className="formgroup">
-								<input  type="text" name={oneField.name} required />
+								<input  type="text" placeholder={oneField.name} name={oneField.name} required />
 							</div>
 							);
 					}
