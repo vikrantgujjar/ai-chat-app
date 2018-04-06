@@ -25,8 +25,8 @@ class UploadScreen extends Component {
 			filename:'Filename',
 			filecontent:'',
 			toggleClassRightArea:'righttArea float-col-3 hidden',
-			toggleClassDbAppRightArea:'dbApprighttArea float-col-3 hidden',
-			toggleClassCenterArea:'centertArea float-col-3 ',
+			toggleClassDbAppRightArea:'dbApprighttArea float-col-3',
+			toggleClassCenterArea:'dbappCentertArea float-col-3 ',
 			chats: [],
 			isChatActive: false,
 			username: '',
@@ -466,6 +466,7 @@ class UploadScreen extends Component {
 		const { chats } = this.state;
 		const { DbMenus } = this.state;
 		const { tablesdata } = this.state;
+		const uploadScreenCont = this;
 		return (
 			<div className="chat clearfix">
 					<div>
@@ -512,7 +513,7 @@ class UploadScreen extends Component {
 											tablesdata.map((table) =>
 												<div className="DbAppSingleTable">
 													<MuiThemeProvider>
-														<DbAppTable table={table}  />
+														<DbAppTable table={table}  uploadScreenCont ={uploadScreenCont} />
 													</MuiThemeProvider>
 												</div>
 											)

@@ -181,20 +181,20 @@ var defaultTables = '[{"Name": "Customers","Fields": [{ "Name": "Name","Type": "
                                 ]';
 function handleDisconnect() {
 
-	// connection = mysql.createConnection({
-	// 								host     : 'localhost',
-	// 								user     : 'root',
-	// 								password : '',
-	// 								database : sysDatabase,
-	// 								insecureAuth: false
-	// 							});
 	connection = mysql.createConnection({
 									host     : 'localhost',
 									user     : 'root',
-									password : 'root',
+									password : '',
 									database : sysDatabase,
 									insecureAuth: false
 								});
+	// connection = mysql.createConnection({
+	// 								host     : 'localhost',
+	// 								user     : 'root',
+	// 								password : 'root',
+	// 								database : sysDatabase,
+	// 								insecureAuth: false
+	// 							});
 
 	connection.connect(function(err) {              // The server is either down
 		if(err) {                                     // or restarting (takes a while sometimes).
@@ -377,13 +377,16 @@ exports.foreignColumn = function(req,res){
 					}else{
 
 							var fieldName = columnName+' id';
+							var thisFieldName = 'id';
 							columns.every(function(column, index) {
 								let loopcolname = column.COLUMN_NAME;
 								if(loopcolname.toLowerCase().trim()=='name'){
 									fieldName = columnName+' name';
+									thisFieldName = 'name';
 									return false;
 								}else if(loopcolname.toLowerCase().trim()=='title'){
-									fieldName = columnName+' name';
+									fieldName = columnName+' title';
+									thisFieldName = 'title';
 									return false;
 								}else{
 									return true;
@@ -392,7 +395,9 @@ exports.foreignColumn = function(req,res){
 							res.send({
 							 "code":200,
 							 "success":true,
-							 "fieldName":fieldName
+							 "fieldName":fieldName,
+							 "table":foreignTable,
+							 "foreignFieldName":thisFieldName
 							});
 					}
 				});
@@ -439,6 +444,71 @@ exports.foreignColumnValue = function(req,res){
 	});
 
 
+}
+exports.deleteRow = function(req,res){
+	var reqTable = req.body.table;
+	var reqSchema = req.body.schema;
+	var rowId = req.body.rowId;
+	connection.query("DELETE FROM "+reqSchema+'.'+reqTable+" WHERE id="+rowId, function (error) {
+		if (error) {
+			res.send({
+				"code":400,
+				"message":"Error occured while deleting row from table "+reqSchema+"_"+reqTable+" rowid-"+rowId,
+				"error" : error
+			});
+		}else{
+			res.send({
+				 "code":200,
+				 "success":true
+				});
+		}
+	});
+}
+exports.addNewRow = function(req,res){
+	var reqTable = req.body.table;
+	var reqSchema = req.body.schema;
+	var reqFormData = req.body.formData;
+	var addNewRowQuery = "INSERT INTO "+reqSchema+"."+reqTable+" ";
+	var valueString = 'VALUES (';
+	var fieldString = '(';
+	var loopCount = 0;
+	var loopMax = Object.keys(reqFormData).length;
+	console.log(loopMax);
+	Object.keys(reqFormData).forEach(function(field){
+		var value= reqFormData[field];
+		loopCount++;
+		fieldString += "`"+field+"`";
+		if (value=='quantity' || value=='qty'  || value=='number'  || value=='count'  || value=='status' || value=='done'|| value=='check' ) {
+            valueString += value;
+        }else{
+             valueString +=  "'"+value+"'";
+        }
+        if(loopCount!=loopMax){
+			valueString += ", ";
+			fieldString += ", ";
+		}
+	});
+
+	fieldString +=")";
+	valueString += ")";
+	addNewRowQuery += fieldString+" "+valueString;
+	console.log(addNewRowQuery);
+	connection.query(addNewRowQuery, function (error, queryResponse) {
+		if (error) {
+			res.send({
+				"code":400,
+				"message":"Error occured while adding new row to table "+reqSchema+"_"+reqTable,
+				"error" : error
+			});
+		}else{
+			var thisSubTableId = queryResponse.insertId;
+			res.send({
+				 "code":200,
+				 "success":true,
+				 "insertedRowId": thisSubTableId
+				});
+		}
+	});
 }
 exports.foreignFormSelect = function(req,res){
 	var classNameAttr = req.body.class;
@@ -1003,11 +1073,15 @@ exports.getTables =  function(req, res){
 
 										prepitem = {};
 										fields= [];
+										var columnCounts = 0;
 										columns.forEach(function(column){
 											let colForLoop = {};
-											colForLoop.name = column.COLUMN_NAME
+											colForLoop.name = column.COLUMN_NAME;
 											fields.push(colForLoop);
+
 										});
+
+										superhero+= 1;
 										prepitem.blocktype = 'table';
 										prepitem.name = tablename;
 										prepitem.tableId = table.id;
@@ -1018,8 +1092,6 @@ exports.getTables =  function(req, res){
 										alltables.push(prepitem);
 										// tables.forEach(function(table) {
 										// });
-
-										superhero+= 1;
 										if (superhero==tables.length) {
 											// console.log(alltables);
 											res.send({

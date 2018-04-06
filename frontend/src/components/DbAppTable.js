@@ -10,8 +10,12 @@ import {
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import FontIcon from 'material-ui/FontIcon';
+import IconButton from 'material-ui/IconButton';
+import ActionHome from 'material-ui/svg-icons/action/home';
 import axios from 'axios';
+import Dialog from 'material-ui/Dialog';
 import appConfig from './../config/appConfig';
+import DbAppTableRow from './DbAppTableRow.js';
 const style = {
   margin: 12,
 };
@@ -25,9 +29,162 @@ class DbAppTable extends Component {
 	constructor(props){
 		super(props);
 		this.state={
-				 formComponent:[]
+				 formComponent:[],
+				 open: false,
+				 dialogForm:[],
+				 updateIt:'s'
 				}
+		this.handleOpen = this.handleOpen.bind(this);
+		this.handleClose = this.handleClose.bind(this);
+		this.handleSubmit = this.handleSubmit.bind(this);
+		this.deleteRow = this.deleteRow.bind(this);
 	}
+
+	handleSubmit(event) {
+
+	    event.preventDefault();
+	    var self = this;
+		var thisTable = self.props.table;
+		var uploadScreenCont = self.props.uploadScreenCont;
+		var thisTableShema = thisTable.schema;
+	    const form = event.target;
+	    var thisFormData = new FormData(form);
+	    var buildData = [];
+	    for (let name of thisFormData.keys()) {
+	      buildData[name] = thisFormData.get(name);
+	    }
+	    // console.log(buildData);
+	    var buildDataobj = {...buildData};
+		var payload ={
+						table: thisTable.name,
+						schema: thisTableShema,
+						formData: buildDataobj
+					}
+		axios.post(appConfig.apiBaseUrl+'addNewRow', payload, {withCredentials: true})
+		 .then(function (response2) {
+			if(response2.data.success === true || response2.data.code ===200){
+				// uploadScreenCont.reloadTables();
+				alert('Row Created'+response2.data.insertedRowId);
+			}
+			else if(response2.data.code === 400){
+					alert('error');
+			}
+			else{
+			}
+		})
+		.catch(function (error) {
+			console.log(error);
+		});
+	}
+	deleteRow(event,rowID){
+		console.log(event);
+		const clickedButton = event.currentTarget;
+		const closestTr = clickedButton.closest("tr");
+	    var self = this;
+		var thisTable = self.props.table;
+		var thisTableShema = thisTable.schema;
+		var rowID = rowID;
+		console.log(rowID);
+		var payload ={
+						table: thisTable.name,
+						schema: thisTableShema,
+						rowId: rowID
+					}
+		axios.post(appConfig.apiBaseUrl+'deleteRow', payload, {withCredentials: true})
+		 .then(function (response2) {
+			if(response2.data.success === true || response2.data.code ===200){
+				clickedButton.style.visibility = "hidden";
+				closestTr.style.visibility = "hidden";
+				alert('Row Deleted');
+			}
+				else if(response2.data.code === 400){
+					alert(response2.data.message);
+			}
+			else{
+			}
+		})
+		.catch(function (error) {
+			console.log(error);
+		});
+	}
+	handleOpen(){
+		this.setState({open: true});
+		var dialogFormHtml = [];
+    	var self = this;
+		var thisTable = self.props.table;
+		if(thisTable.blocktype=='table'){
+			var thisTableFields = thisTable.columns;
+			var thisTableShema = thisTable.schema;
+			var thisTableData = thisTable.data;
+			var colCount = thisTableFields.length;
+			var colLoopCount = 0;
+			// console.log(colCount);
+			thisTableFields.forEach(function(oneField,key){
+				colLoopCount++;
+				if (oneField.foreignColumn &&  typeof oneField.foreignColumn !== "undefined") {
+					let foreignTableName = oneField.foreignTable;
+					var payload ={
+									class:'',
+									id: '',
+									name: oneField.name,
+									schema: thisTableShema,
+									foreignTable: oneField.foreignTable,
+									field: oneField.foreignColumn
+								}
+					axios.post(appConfig.apiBaseUrl+'foreignFormSelect', payload, {withCredentials: true})
+					 .then(function (response2) {
+						if(response2.data.success === true || response2.data.code ===200){
+							// dialogFormHtml.push(
+							// 	response2.data.formString
+							// );
+							var primaryValueArray = response2.data.primaryValues;
+							dialogFormHtml.push(
+								<div className="formgroup">
+									<select className="" name={oneField.name}>
+									{
+										primaryValueArray.map((optionData) =>
+																<option value={optionData.id}>{optionData.value}</option>
+															)
+									}
+									</select>
+								</div>
+							);
+							if(colLoopCount ==colCount){
+									// console.log('should be last');
+									self.setState({dialogForm: dialogFormHtml});
+							}
+						}
+							else if(response2.data.code === 400){
+						}
+						else{
+						}
+					})
+					.catch(function (error) {
+						console.log(error);
+					});
+
+				}else{
+					if(oneField.name != 'id' && oneField.name != 'date'){
+						dialogFormHtml.push(
+							<div  className="formgroup">
+								<input  type="text" name={oneField.name} required />
+							</div>
+							);
+					}
+
+					if(colLoopCount ==colCount){
+							console.log('should be last');
+							self.setState({dialogForm: dialogFormHtml});
+							
+					}
+				}
+			});
+
+		}
+  	}
+  	handleClose() {
+		this.setState({open: false});
+	};
 	componentWillMount(){
 		var self = this;
 		var thisTable = self.props.table;
@@ -43,80 +200,45 @@ class DbAppTable extends Component {
 								}
 					axios.post(appConfig.apiBaseUrl+'foreignColumn', payload, {withCredentials: true})
 					 .then(function (response) {
-						// console.log(response);
 						if(response.data.success === true || response.data.code ===200){
-							self.props.table.columns[key].foreign = response.data.fieldName;
-
+							self.props.table.columns[key].foreignColumn = response.data.foreignFieldName;
+							self.props.table.columns[key].foreignTable = response.data.table;
+							self.props.table.columns[key].tableColumn = response.data.fieldName;
 							thisTableData.forEach(function(row,key2){
 								let preFieldNamelength = oneField.name.length - 2
 								let newFieldNamelength = response.data.fieldName.length - preFieldNamelength
 								let makeFieldName = response.data.fieldName.slice(-newFieldNamelength);
 								var payload ={
-									table: oneField.name.substring(0, oneField.name.length - 2)+'s',
-									schema: thisTableShema,
-									id: row[oneField.name],
-									field: makeFieldName
-								}
+												table: oneField.name.substring(0, oneField.name.length - 2)+'s',
+												schema: thisTableShema,
+												id: row[oneField.name],
+												field: makeFieldName
+											}
 								axios.post(appConfig.apiBaseUrl+'foreignColumnValue', payload, {withCredentials: true})
 								 .then(function (response2) {
-									// console.log(response);
 									if(response2.data.success === true || response2.data.code ===200){
 										self.props.table.data[key2][oneField.name] = response2.data.fieldValue;
-
-										// thisTableData.forEach(function(row,key){
-
-										// });
-									 }
-									 else if(response2.data.code === 400){
-										// console.log(response.data);
-									 }
-									 else{
-									 }
-								 })
-								 .catch(function (error) {
-									 console.log(error);
-								 });
+										let funkything = self.state.updateIt+' s';
+										self.setState({updateIt:funkything});
+									}
+										else if(response2.data.code === 400){
+									}
+									else{
+									}
+								})
+								.catch(function (error) {
+									console.log(error);
+								});
 							});
-
-							let preFieldNamelength = oneField.name.length - 2
-							let newFieldNamelength = response.data.fieldName.length - preFieldNamelength
-							let makeFieldName = response.data.fieldName.slice(-newFieldNamelength);
-							var payload ={
-								id: oneField.name+'_'+thisTable.name,
-								class: oneField.name+'_className',
-								name: oneField.name,
-								schema: thisTableShema,
-								field: makeFieldName,
-								foreignTable: oneField.name.substring(0, oneField.name.length - 2)+'s'
-							}
-							axios.post(appConfig.apiBaseUrl+'foreignFormSelect', payload, {withCredentials: true})
-							 .then(function (response3) {
-								// console.log(response);
-								if(response3.data.success === true || response3.data.code ===200){
-									
-									// let localloginComponent=<div  dangerouslySetInnerHTML={{__html: response3.data.formString}}> </div>;
-									self.props.table.columns[key].primaryValues = response3.data.primaryValues;
-									console.log(response3.data.primaryValues);
-								 }
-								 else if(response3.data.code === 400){
-									// console.log(response3.data);
-								 }
-								 else{
-								 }
-							 })
-							 .catch(function (error) {
-								 console.log(error);
-							 });
-						 }
-						 else if(response.data.code === 400){
-							// console.log(response.data);
-						 }
-						 else{
-						 }
-					 })
-					 .catch(function (error) {
-						 console.log(error);
-					 });
+						}
+						else if(response.data.code === 400){
+						}
+						else{
+						}
+					})
+					.catch(function (error) {
+						console.log(error);
+					});
 				}
 			});
 		}
@@ -150,19 +272,6 @@ class DbAppTable extends Component {
 			 console.log(error);
 		 });
 	}
-	state = {
-	selected: [1],
-	};
-
-	isSelected = (index) => {
-	return this.state.selected.indexOf(index) !== -1;
-	};
-
-	handleRowSelection = (selectedRows) => {
-	this.setState({
-	selected: selectedRows,
-	});
-	};
 
 	handleCellClick(e){
 
@@ -171,25 +280,38 @@ class DbAppTable extends Component {
 
 	render() {
 		const {table} = this.props;
+		 const actions = [
+		      <FlatButton
+		        label="Cancel"
+		        primary={true}
+		        onClick={this.handleClose}
+		      />,
+		      <FlatButton
+		        label="Submit"
+		        primary={true}
+		        onClick={this.handleClose}
+		      />,
+		    ];
 		return (
 			<div className={` ${table.ishidden ? "hidden" : ""}`}>
 				{table.blocktype=='table' &&
 					<div>
-						<div className="DBappTablepanelheading">
+						<div className="DBappTablepanelheading clearfix">
 							<span className="resTableSchema"> 
 								{ appConfig.defschema !==table.schema
 				          			 && table.schema
 				       			}
 			       			</span>
 			       			<span className="resTableTitle"> {table.name} </span>
+			       			<div className="resTableAction"><RaisedButton label="Add Row" secondary={true} onClick={this.handleOpen} /></div>
 		       			</div>
 						<div className="resTableContainer">
 							<table multiSelectable='true' onCellClick={(event) => this.handleCellClick(event)} bodyStyle={{overflow:'visible'}}>
-								<thead>
+								<thead className={this.state.updateIt}>
 									<tr>
 										{
 											table.columns.map((field) =>
-												<th   style={ colWidth }>{field.foreign ? field.foreign : field.name}</th>
+												<th   style={ colWidth }>{field.tableColumn ? field.tableColumn : field.name}</th>
 											)
 										}
 										<th>Action</th>
@@ -204,46 +326,28 @@ class DbAppTable extends Component {
 																<td  style={ colWidth }>{row[field.name]}</td>
 															)
 												}
-												<td>disabled
+												<td>
+													<RaisedButton label="Delete" primary={true} onClick={(event) => this.deleteRow(event,row["id"])} />
 									    		</td>
 											  </tr>
 										)
 									}
-									<tr>
-										{
-											table.columns.map((field) =>
-												<td   style={ colWidth }>
-												{ field.foreign &&
-														<select>
-															{
-																field.primaryValues.map((optionrec)=>
-																	<option value={optionrec.id} >{optionrec.value}</option>
-																)
-															}
-														</select>
-												}
-												{ field.foreign=='undefined' &&
-									                 (function() {
-											                switch(field.name) {
-											                    case 'id':
-											                        return 'Auto fill';
-											                    case 'date':
-											                        return 'Auto fill';
-											                    case 'error':
-											                        return 'error';
-											                    default:
-											                    	return  <input type="text" />;
-											                }
-											            })()
-									            }
-
-												</td>
-											)
-										}
-										<td>Add</td>
-									</tr>
 								</tbody>
 							</table>
+						</div>
+						<div>
+							<Dialog
+							title="New Row"
+							actions={actions}
+							modal={false}
+							open={this.state.open}
+							onRequestClose={this.handleClose}
+							>
+								<form onSubmit={this.handleSubmit}>
+									{this.state.dialogForm}
+									<button>Send data!</button>
+								</form>
+							</Dialog>
 						</div>
 					</div>
 				}
