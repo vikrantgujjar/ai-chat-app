@@ -181,20 +181,20 @@ var defaultTables = '[{"Name": "Customers","Fields": [{ "Name": "Name","Type": "
                                 ]';
 function handleDisconnect() {
 
-	// connection = mysql.createConnection({
-	// 								host     : 'localhost',
-	// 								user     : 'root',
-	// 								password : '',
-	// 								database : sysDatabase,
-	// 								insecureAuth: false
-	// 							});
 	connection = mysql.createConnection({
 									host     : 'localhost',
 									user     : 'root',
-									password : 'root',
+									password : '',
 									database : sysDatabase,
 									insecureAuth: false
 								});
+	// connection = mysql.createConnection({
+	// 								host     : 'localhost',
+	// 								user     : 'root',
+	// 								password : 'root',
+	// 								database : sysDatabase,
+	// 								insecureAuth: false
+	// 							});
 
 	connection.connect(function(err) {              // The server is either down
 		if(err) {                                     // or restarting (takes a while sometimes).
@@ -421,7 +421,7 @@ exports.foreignColumnValue = function(req,res){
 
 	connection.query('SELECT * FROM '+schema+'.'+foreignTable+' where id='+rowId, function (error, tabledata, fields) {
 		if (error) {
-			console.log("error ocurred inside table"+tablename + "  ---",error);
+			console.log("error ocurred inside table"+foreignTable + "  ---",error);
 			res.send({
 				"code":400,
 				"message":"error ocurred"
@@ -473,7 +473,7 @@ exports.addNewRow = function(req,res){
 	var fieldString = '(';
 	var loopCount = 0;
 	var loopMax = Object.keys(reqFormData).length;
-	console.log(loopMax);
+	// console.log(loopMax);
 	Object.keys(reqFormData).forEach(function(field){
 		var value= reqFormData[field];
 		loopCount++;
@@ -492,7 +492,7 @@ exports.addNewRow = function(req,res){
 	fieldString +=")";
 	valueString += ")";
 	addNewRowQuery += fieldString+" "+valueString;
-	console.log(addNewRowQuery);
+	// console.log(addNewRowQuery);
 	connection.query(addNewRowQuery, function (error, queryResponse) {
 		if (error) {
 			res.send({
@@ -1037,7 +1037,7 @@ exports.getTables =  function(req, res){
 	}
 	alltables= [];
 	superhero = 0;
-	connection.query('SELECT * FROM '+alltablesDef, function (error, tables, fields) {
+	connection.query('SELECT * FROM '+alltablesDef, function (error, tables) {
 		if (error) {
 			console.log("error ocurred",error);
 			res.send({
@@ -1053,7 +1053,7 @@ exports.getTables =  function(req, res){
 				var tablesishidden = table.ishidden;
 				// console.log(table);
 				if(table.block_type == 'table'){
-					connection.query('SELECT * FROM '+tableschema+'.'+tablename, function (error, tabledata, fields) {
+					connection.query('SELECT * FROM '+tableschema+'.'+tablename, function (error, tabledata, fieldset) {
 						if (error) {
 							console.log("error ocurred inside table"+tablename + "  ---",error);
 							res.send({
@@ -1061,27 +1061,119 @@ exports.getTables =  function(req, res){
 								"message":"error ocurred"
 							})
 						}else{
+							var fields= [];
+							var fieldsetCount = 0;
+							var fieldsetMax = fieldset.length;
+							var colordCount = 0;
+							fieldset.forEach(function(fieldEach){
+								colordCount++;
+								let colForLoop = {};
+								colForLoop.name = fieldEach.name;
+								colForLoop.ord = colordCount;
+								if (colForLoop.name.slice(-2) == 'id' && colForLoop.name.length > 2) {
+									var columnName = colForLoop.name.substring(0, colForLoop.name.length - 2)
+									var foreignTable = columnName+'s';
+									connection.query('SELECT * FROM '+alltablesDef+' where tablename="'+foreignTable+'" AND schema_name="'+tableschema+'"', function (error, findTabledata) {
+										if (error) {
+											console.log("error ocurred inside table"+foreignTable + "  ---",error);
+											res.send({
+												"code":400,
+												"message":"error ocurred"
+											})
+										}else{
+											if(findTabledata.length >= 1){
+												connection.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='"+tableschema+"' AND `TABLE_NAME`='"+foreignTable+"'", function (error, columns) {
+													if (error) {
+														console.log("error ocurred inside table"+foreignTable + "  ---",error);
+														res.send({
+															"code":400,
+															"message":"error ocurred"
+														})
+													}else{
 
-							connection.query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='"+tableschema+"' AND `TABLE_NAME`='"+tablename+"'", function (error, columns, fields) {
-								if (error) {
-									console.log("error ocurred inside table"+tablename + "  ---",error);
-									res.send({
-										"code":400,
-										"message":"error ocurred"
-									})
+															var fieldName = columnName+' id';
+															var thisFieldName = 'id';
+															columns.every(function(column, index) {
+																let loopcolname = column.COLUMN_NAME;
+																if(loopcolname.toLowerCase().trim()=='name'){
+																	fieldName = columnName+' name';
+																	thisFieldName = 'name';
+																	return false;
+																}else if(loopcolname.toLowerCase().trim()=='title'){
+																	fieldName = columnName+' title';
+																	thisFieldName = 'title';
+																	return false;
+																}else{
+																	return true;
+																}
+															});
+															colForLoop.foreignColumn=thisFieldName;
+															colForLoop.foreignTable=foreignTable;
+															colForLoop.tableColumn=fieldName;
+
+															fields.push(colForLoop);
+															fieldsetCount++;
+															if(fieldsetCount == fieldsetMax){
+																prepitem = {};
+																prepitem.blocktype = 'table';
+																prepitem.name = tablename;
+																prepitem.tableId = table.id;
+																prepitem.ishidden = tablesishidden;
+																prepitem.columns = fields;
+																prepitem.schema = tableschema;
+																prepitem.data = tabledata;
+																alltables.push(prepitem);
+																// tables.forEach(function(table) {
+																// });
+																superhero+= 1;
+																if (superhero==tables.length) {
+																	// console.log(alltables);
+																	res.send({
+																		 "code":200,
+																		 "success":true,
+																		 "tables":alltables
+																			 });
+																} else {
+
+																}
+															}
+													}
+												});
+											}else{
+												fields.push(colForLoop);
+												fieldsetCount++;
+												if(fieldsetCount == fieldsetMax){
+													prepitem = {};
+													prepitem.blocktype = 'table';
+													prepitem.name = tablename;
+													prepitem.tableId = table.id;
+													prepitem.ishidden = tablesishidden;
+													prepitem.columns = fields;
+													prepitem.schema = tableschema;
+													prepitem.data = tabledata;
+													alltables.push(prepitem);
+													// tables.forEach(function(table) {
+													// });
+													superhero+= 1;
+													if (superhero==tables.length) {
+														// console.log(alltables);
+														res.send({
+															 "code":200,
+															 "success":true,
+															 "tables":alltables
+																 });
+													} else {
+
+													}
+												}
+											}
+										}
+									});
 								}else{
-
+									fields.push(colForLoop);
+									fieldsetCount++;
+									if(fieldsetCount == fieldsetMax){
 										prepitem = {};
-										fields= [];
-										var columnCounts = 0;
-										columns.forEach(function(column){
-											let colForLoop = {};
-											colForLoop.name = column.COLUMN_NAME;
-											fields.push(colForLoop);
-
-										});
-
-										superhero+= 1;
 										prepitem.blocktype = 'table';
 										prepitem.name = tablename;
 										prepitem.tableId = table.id;
@@ -1092,6 +1184,7 @@ exports.getTables =  function(req, res){
 										alltables.push(prepitem);
 										// tables.forEach(function(table) {
 										// });
+										superhero+= 1;
 										if (superhero==tables.length) {
 											// console.log(alltables);
 											res.send({
@@ -1102,8 +1195,12 @@ exports.getTables =  function(req, res){
 										} else {
 
 										}
+									}
 								}
+
 							});
+
+							
 						}
 					});
 				}else if(table.block_type == 'heading'){

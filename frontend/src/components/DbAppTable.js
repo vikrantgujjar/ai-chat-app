@@ -191,55 +191,43 @@ class DbAppTable extends Component {
 		var thisTable = self.props.table;
 		if(thisTable.blocktype=='table'){
 			var thisTableFields = thisTable.columns;
+			let asdfg =thisTableFields;
+			asdfg.sort(function(a, b){
+			    return a.ord - b.ord;
+			});
+			self.props.table.columns = asdfg;
 			var thisTableShema = thisTable.schema;
 			var thisTableData = thisTable.data;
 			thisTableFields.forEach(function(oneField,key){
-				if (oneField.name.slice(-2) == 'id' && oneField.name.length > 2) {
-					var payload ={
-									column: oneField.name.substring(0, oneField.name.length - 2),
-									schema: thisTableShema
-								}
-					axios.post(appConfig.apiBaseUrl+'foreignColumn', payload, {withCredentials: true})
-					 .then(function (response) {
-						if(response.data.success === true || response.data.code ===200){
-							self.props.table.columns[key].foreignColumn = response.data.foreignFieldName;
-							self.props.table.columns[key].foreignTable = response.data.table;
-							self.props.table.columns[key].tableColumn = response.data.fieldName;
-							thisTableData.forEach(function(row,key2){
-								let preFieldNamelength = oneField.name.length - 2
-								let newFieldNamelength = response.data.fieldName.length - preFieldNamelength
-								let makeFieldName = response.data.fieldName.slice(-newFieldNamelength);
-								var payload ={
-												table: oneField.name.substring(0, oneField.name.length - 2)+'s',
-												schema: thisTableShema,
-												id: row[oneField.name],
-												field: makeFieldName
-											}
-								axios.post(appConfig.apiBaseUrl+'foreignColumnValue', payload, {withCredentials: true})
-								 .then(function (response2) {
-									if(response2.data.success === true || response2.data.code ===200){
-										self.props.table.data[key2][oneField.name] = response2.data.fieldValue;
-										let funkything = self.state.updateIt+' s';
-										self.setState({updateIt:funkything});
+				if (oneField.foreignColumn  &&  typeof oneField.foreignColumn !== "undefined" ) {
+					console.log(oneField.foreignColumn.length);
+					thisTableData.forEach(function(row,key2){
+						let preFieldNamelength = oneField.name.length - 2
+						let newFieldNamelength = oneField.tableColumn.length - preFieldNamelength
+						let makeFieldName = oneField.tableColumn.slice(-newFieldNamelength);
+						var payload ={
+										table: oneField.name.substring(0, oneField.name.length - 2)+'s',
+										schema: thisTableShema,
+										id: row[oneField.name],
+										field: makeFieldName
 									}
-										else if(response2.data.code === 400){
-									}
-									else{
-									}
-								})
-								.catch(function (error) {
-									console.log(error);
-								});
-							});
-						}
-						else if(response.data.code === 400){
-						}
-						else{
-						}
-					})
-					.catch(function (error) {
-						console.log(error);
+						axios.post(appConfig.apiBaseUrl+'foreignColumnValue', payload, {withCredentials: true})
+						 .then(function (response2) {
+							if(response2.data.success === true || response2.data.code ===200){
+								self.props.table.data[key2][oneField.name] = response2.data.fieldValue;
+								let funkything = self.state.updateIt+' s';
+								self.setState({updateIt:funkything});
+							}
+								else if(response2.data.code === 400){
+							}
+							else{
+							}
+						})
+						.catch(function (error) {
+							console.log(error);
+						});
 					});
+
 				}
 			});
 		}
