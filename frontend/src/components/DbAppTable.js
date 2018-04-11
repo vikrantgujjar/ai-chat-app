@@ -198,6 +198,8 @@ class DbAppTable extends Component {
 			self.props.table.columns = asdfg;
 			var thisTableShema = thisTable.schema;
 			var thisTableData = thisTable.data;
+			var fieldloopcount = 0;
+			var fieldloopMax = thisTableFields.length;
 			thisTableFields.forEach(function(oneField,key){
 				if (oneField.foreignColumn  &&  typeof oneField.foreignColumn !== "undefined" ) {
 					console.log(oneField.foreignColumn.length);
@@ -215,12 +217,24 @@ class DbAppTable extends Component {
 						 .then(function (response2) {
 							if(response2.data.success === true || response2.data.code ===200){
 								self.props.table.data[key2][oneField.name] = response2.data.fieldValue;
-								let funkything = self.state.updateIt+' s';
-								self.setState({updateIt:funkything});
-							}
-								else if(response2.data.code === 400){
+								fieldloopcount++;
+								if(fieldloopcount==fieldloopMax){
+									let funkything = self.state.updateIt+' s';
+									self.setState({updateIt:funkything});
+								}
+							}else if(response2.data.code === 400){
+								fieldloopcount++;
+								if(fieldloopcount==fieldloopMax){
+									let funkything = self.state.updateIt+' s';
+									self.setState({updateIt:funkything});
+								}
 							}
 							else{
+								fieldloopcount++;
+								if(fieldloopcount==fieldloopMax){
+									let funkything = self.state.updateIt+' s';
+									self.setState({updateIt:funkything});
+								}
 							}
 						})
 						.catch(function (error) {
@@ -228,6 +242,12 @@ class DbAppTable extends Component {
 						});
 					});
 
+				}else{
+					fieldloopcount++;
+					if(fieldloopcount==fieldloopMax){
+						let funkything = self.state.updateIt+' s';
+						self.setState({updateIt:funkything});
+					}
 				}
 			});
 		}
