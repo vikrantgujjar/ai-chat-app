@@ -181,20 +181,20 @@ var defaultTables = '[{"Name": "Customers","Fields": [{ "Name": "Name","Type": "
                                 ]';
 function handleDisconnect() {
 
-	connection = mysql.createConnection({
-									host     : 'localhost',
-									user     : 'root',
-									password : '',
-									database : sysDatabase,
-									insecureAuth: false
-								});
 	// connection = mysql.createConnection({
 	// 								host     : 'localhost',
 	// 								user     : 'root',
-	// 								password : 'root',
+	// 								password : '',
 	// 								database : sysDatabase,
 	// 								insecureAuth: false
 	// 							});
+	connection = mysql.createConnection({
+									host     : 'localhost',
+									user     : 'root',
+									password : 'root',
+									database : sysDatabase,
+									insecureAuth: false
+								});
 
 	connection.connect(function(err) {              // The server is either down
 		if(err) {                                     // or restarting (takes a while sometimes).
