@@ -219,20 +219,20 @@ class DbAppTable extends Component {
 								self.props.table.data[key2][oneField.name] = response2.data.fieldValue;
 								fieldloopcount++;
 								if(fieldloopcount==fieldloopMax){
-									let funkything = self.state.updateIt+' s';
+									let funkything = self.state.updateIt+' callsuccess';
 									self.setState({updateIt:funkything});
 								}
 							}else if(response2.data.code === 400){
 								fieldloopcount++;
 								if(fieldloopcount==fieldloopMax){
-									let funkything = self.state.updateIt+' s';
+									let funkything = self.state.updateIt+' callnorecord';
 									self.setState({updateIt:funkything});
 								}
 							}
 							else{
 								fieldloopcount++;
 								if(fieldloopcount==fieldloopMax){
-									let funkything = self.state.updateIt+' s';
+									let funkything = self.state.updateIt+' callfail';
 									self.setState({updateIt:funkything});
 								}
 							}
@@ -245,7 +245,7 @@ class DbAppTable extends Component {
 				}else{
 					fieldloopcount++;
 					if(fieldloopcount==fieldloopMax){
-						let funkything = self.state.updateIt+' s';
+						let funkything = self.state.updateIt+' nocall';
 						self.setState({updateIt:funkything});
 					}
 				}
