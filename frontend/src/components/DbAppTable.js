@@ -221,6 +221,7 @@ class DbAppTable extends Component {
 								if(fieldloopcount==fieldloopMax){
 									let funkything = self.state.updateIt+' callsuccess';
 									self.setState({updateIt:funkything});
+									self.forceUpdate();
 								}
 							}else if(response2.data.code === 400){
 								fieldloopcount++;
