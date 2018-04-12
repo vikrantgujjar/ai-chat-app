@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import {
   Table,
   TableBody,
@@ -32,12 +33,28 @@ class DbAppTable extends Component {
 				 formComponent:[],
 				 open: false,
 				 dialogForm:[],
-				 updateIt:'s'
+				 updateIt:'s',
+				 currentedit: []
 				}
 		this.handleOpen = this.handleOpen.bind(this);
+		this.topElementClick = this.topElementClick.bind(this);
 		this.handleClose = this.handleClose.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.deleteRow = this.deleteRow.bind(this);
+		this.filterRow = this.filterRow.bind(this);
+		this.handleColumnDblClick = this.handleColumnDblClick.bind(this);
+	}
+	topElementClick(event){
+		var self =this;
+		var openedEditColumn = ReactDOM.findDOMNode(self.refs.openedEditColumn);
+		var clickedElementIs = event.target;
+		console.log(clickedElementIs);
+		console.log(openedEditColumn);
+		if(clickedElementIs == openedEditColumn){
+			console.log('clicked in.....');
+		}else{
+			console.log('clicked out.....');
+		}
 	}
 
 	handleSubmit(event) {
@@ -63,7 +80,7 @@ class DbAppTable extends Component {
 		axios.post(appConfig.apiBaseUrl+'addNewRow', payload, {withCredentials: true})
 		 .then(function (response2) {
 			if(response2.data.success === true || response2.data.code ===200){
-				// uploadScreenCont.reloadTables();
+				uploadScreenCont.reloadTables();
 				alert('Row Created'+response2.data.insertedRowId);
 			}
 			else if(response2.data.code === 400){
@@ -76,15 +93,17 @@ class DbAppTable extends Component {
 			console.log(error);
 		});
 	}
+	filterRow(event,rowID){
+
+	}
 	deleteRow(event,rowID){
-		console.log(event);
 		const clickedButton = event.currentTarget;
 		const closestTr = clickedButton.closest("tr");
 	    var self = this;
+	    var uploadScreenCont = self.props.uploadScreenCont;
 		var thisTable = self.props.table;
 		var thisTableShema = thisTable.schema;
 		var rowID = rowID;
-		console.log(rowID);
 		var payload ={
 						table: thisTable.name,
 						schema: thisTableShema,
@@ -93,8 +112,9 @@ class DbAppTable extends Component {
 		axios.post(appConfig.apiBaseUrl+'deleteRow', payload, {withCredentials: true})
 		 .then(function (response2) {
 			if(response2.data.success === true || response2.data.code ===200){
-				clickedButton.style.visibility = "hidden";
-				closestTr.style.visibility = "hidden";
+				 uploadScreenCont.reloadTables();
+				// clickedButton.style.visibility = "hidden";
+				// closestTr.style.visibility = "hidden";
 				alert('Row Deleted');
 			}
 				else if(response2.data.code === 400){
@@ -174,7 +194,6 @@ class DbAppTable extends Component {
 					}
 
 					if(colLoopCount ==colCount){
-							console.log('should be last');
 							self.setState({dialogForm: dialogFormHtml});
 							
 					}
@@ -202,7 +221,6 @@ class DbAppTable extends Component {
 			var fieldloopMax = thisTableFields.length;
 			thisTableFields.forEach(function(oneField,key){
 				if (oneField.foreignColumn  &&  typeof oneField.foreignColumn !== "undefined" ) {
-					console.log(oneField.foreignColumn.length);
 					thisTableData.forEach(function(row,key2){
 						let preFieldNamelength = oneField.name.length - 2
 						let newFieldNamelength = oneField.tableColumn.length - preFieldNamelength
@@ -261,12 +279,12 @@ class DbAppTable extends Component {
 					}
 		axios.post(appConfig.apiBaseUrl+apiroute, payload, {withCredentials: true})
 		 .then(function (response) {
-			console.log(response);
+			// console.log(response);
 			if(response.data.success === true || response.data.code ===200){
 				
 			 }
 			 else if(response.data.code === 400){
-				 console.log(response.data);
+				 // console.log(response.data);
 				 if(response.data.error.code=="ER_TABLE_EXISTS_ERROR"){
 				 	alert("Error ! "+response.data.error.sqlMessage);
 				 }else{
@@ -284,9 +302,69 @@ class DbAppTable extends Component {
 	}
 
 	handleCellClick(e){
-
+		 console.log('cell click');
 	}
+	handleColumnDblClick(e){
+		console.log('dbl click');
+		var self = this;
+		var clickedTd = e.target;
+		var thisColumnData = clickedTd.textContent;
+		var thisColumnIndex = clickedTd.dataset.columnOrd;
+		var thisColumnField = '';
 
+		var thisTable = self.props.table;
+		var thisTableShema =thisTable.schema;
+		var thisColumn = thisTable.columns[thisColumnIndex-1];
+		if(thisColumn.name=="id" || thisColumn.name=="date"){
+			return;
+		}
+		console.log(thisColumn);
+		if(thisColumn.foreignColumn  &&  typeof thisColumn.foreignColumn !== "undefined" ){
+			console.log('is foreign');
+			let foreignTableName = thisColumn.foreignTable;
+			var payload ={
+							class:'',
+							id: '',
+							name: thisColumn.name,
+							schema: thisTableShema,
+							foreignTable: thisColumn.foreignTable,
+							field: thisColumn.foreignColumn
+						}
+			axios.post(appConfig.apiBaseUrl+'foreignFormSelect', payload, {withCredentials: true})
+			 .then(function (response2) {
+				if(response2.data.success === true || response2.data.code ===200){
+					// dialogFormHtml.push(
+					// 	response2.data.formString
+					// );
+					var primaryValueArray = response2.data.primaryValues;
+					thisColumnField='<select ref="openedEditColumn" className="" name="' + thisColumn.name + '">';
+					primaryValueArray.forEach(function(optionData,key){
+						let selectdVar ='';
+						if(optionData.value==thisColumnData){
+							selectdVar ='selected';
+						}
+						thisColumnField+='<option value='+optionData.id+' '+selectdVar+'>'+optionData.value+'</option>';
+					});
+					thisColumnField +='</select>';
+
+						clickedTd.innerHTML = thisColumnField;
+
+				}
+					else if(response2.data.code === 400){
+				}
+				else{
+				}
+			})
+			.catch(function (error) {
+				console.log(error);
+			});
+		}else{
+			thisColumnField ='<input type="text"  ref="openedEditColumn" name="'+thisColumn.name+'"  value="'+thisColumnData+'"/>'
+			clickedTd.innerHTML = thisColumnField;
+		}
+
+		
+	}
 
 	render() {
 		const {table} = this.props;
@@ -295,17 +373,12 @@ class DbAppTable extends Component {
 		        label="Cancel"
 		        primary={true}
 		        onClick={this.handleClose}
-		      />,
-		      <FlatButton
-		        label="Submit"
-		        primary={true}
-		        onClick={this.handleClose}
-		      />,
+		      />
 		    ];
 		return (
 			<div className={` ${table.ishidden ? "hidden" : ""}`}>
 				{table.blocktype=='table' &&
-					<div>
+					<div onClick={(event) => this.topElementClick(event)}>
 						<div className="DBappTablepanelheading clearfix">
 							<span className="resTableSchema"> 
 								{ appConfig.defschema !==table.schema
@@ -333,11 +406,12 @@ class DbAppTable extends Component {
 											  <tr>
 												{
 													table.columns.map((field) =>
-																<td  style={ colWidth }>{row[field.name]}</td>
+																<td data-column-name={field.name} data-column-ord={field.ord} onDoubleClick={(e) =>this.handleColumnDblClick(e)} style={ colWidth }>{row[field.name]}</td>
 															)
 												}
 												<td>
-													<RaisedButton label="Delete" primary={true} onClick={(event) => this.deleteRow(event,row["id"])} />
+													<RaisedButton label="Delete" success={true} onClick={(event) => this.deleteRow(event,row["id"])} />
+													<RaisedButton label="Filter" primary={true} onClick={(event) => this.filterRow(event,row["id"])} />
 									    		</td>
 											  </tr>
 										)
@@ -347,7 +421,7 @@ class DbAppTable extends Component {
 						</div>
 						<div>
 							<Dialog
-							title="New Row"
+							title={'Add New '+table.name.slice(0, -1)+''}
 							actions={actions}
 							modal={false}
 							open={this.state.open}
